@@ -26,7 +26,7 @@
 //! ```
 //! use has_flag::has_flag_argv;
 //!
-//! // Looks through std::env::args() for `--verbose`.
+//! // Looks through the process arguments for `--verbose`.
 //! let _present: bool = has_flag_argv("verbose");
 //! ```
 
@@ -70,13 +70,7 @@
 /// assert!(!has_flag("unicorn", &with_terminator)); // after `--`
 /// ```
 pub fn has_flag<S: AsRef<str>>(flag: &str, argv: &[S]) -> bool {
-    let prefix = if flag.starts_with('-') {
-        ""
-    } else if flag.encode_utf16().count() == 1 {
-        "-"
-    } else {
-        "--"
-    };
+    let prefix = prefix_for(flag);
 
     // Match a token against `prefix + flag` without allocating the needle.
     let matches = |arg: &str| {
@@ -85,22 +79,40 @@ pub fn has_flag<S: AsRef<str>>(flag: &str, argv: &[S]) -> bool {
             && arg[prefix.len()..] == *flag
     };
 
-    let position = argv.iter().position(|arg| matches(arg.as_ref()));
-    let terminator = argv.iter().position(|arg| arg.as_ref() == "--");
+    for arg in argv {
+        let arg = arg.as_ref();
+        if arg == "--" {
+            // The terminator stops the search. Anything at or after it loses.
+            // A flag that is itself `--` collides here and returns false.
+            return false;
+        }
+        if matches(arg) {
+            return true;
+        }
+    }
+    false
+}
 
-    match (position, terminator) {
-        (Some(found), Some(stop)) => found < stop,
-        (Some(_), None) => true,
-        (None, _) => false,
+/// Pick the dash prefix for `flag` under the optional-prefix rule.
+///
+/// Returns `""` when `flag` already starts with `-`, `"-"` for a flag one
+/// UTF-16 code unit long, and `"--"` otherwise.
+fn prefix_for(flag: &str) -> &'static str {
+    if flag.starts_with('-') {
+        ""
+    } else if flag.encode_utf16().count() == 1 {
+        "-"
+    } else {
+        "--"
     }
 }
 
 /// Check whether `flag` is present in the process arguments.
 ///
-/// This reads the process arguments on each call and forwards to [`has_flag`].
-/// The whole argument vector is searched as-is, including the program path at
-/// index zero. A flag needle never realistically matches that path, so the
-/// leading element is harmless.
+/// This reads the process arguments on each call and applies the same rule as
+/// [`has_flag`]. The whole argument vector is searched as-is, including the
+/// program path at index zero. A flag needle never realistically matches that
+/// path, so the leading element is harmless.
 ///
 /// Arguments that are not valid Unicode are skipped. Such an argument can never
 /// equal a `&str` flag, so the result is unchanged and the call never panics on
@@ -115,8 +127,22 @@ pub fn has_flag<S: AsRef<str>>(flag: &str, argv: &[S]) -> bool {
 /// assert!(!has_flag_argv("--definitely-not-a-real-flag-xyz"));
 /// ```
 pub fn has_flag_argv(flag: &str) -> bool {
-    let argv: Vec<String> = std::env::args_os()
-        .filter_map(|arg| arg.into_string().ok())
-        .collect();
-    has_flag(flag, &argv)
+    let prefix = prefix_for(flag);
+
+    // Build the needle once, then scan the arguments lazily. Comparing each
+    // `OsString` to a `&str` skips non-Unicode arguments for free, since such
+    // an argument never equals a UTF-8 needle.
+    let mut needle = String::with_capacity(prefix.len() + flag.len());
+    needle.push_str(prefix);
+    needle.push_str(flag);
+
+    for arg in std::env::args_os() {
+        if arg == *"--" {
+            return false;
+        }
+        if arg == *needle {
+            return true;
+        }
+    }
+    false
 }

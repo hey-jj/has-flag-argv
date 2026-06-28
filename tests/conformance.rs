@@ -225,6 +225,24 @@ const CASES: &[Case] = &[
         want: false,
         note: "N: needle only after first terminator, even with a later token",
     },
+    Case {
+        flag: "--",
+        argv: &["--"],
+        want: false,
+        note: "O: flag is -- in a single-element argv, position equals terminator",
+    },
+    Case {
+        flag: " u",
+        argv: &["-u"],
+        want: false,
+        note: "P: leading space makes the needle `-- u`, which is absent",
+    },
+    Case {
+        flag: "u",
+        argv: &[" -u"],
+        want: false,
+        note: "Q: padded argv token does not equal the clean needle `-u`",
+    },
 ];
 
 #[test]

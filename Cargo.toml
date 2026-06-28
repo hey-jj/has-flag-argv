@@ -6,5 +6,15 @@ description = "detect presence of a CLI flag in argv"
 license = "MIT"
 repository = "https://github.com/hey-jj/has-flag-rs"
 readme = "README.md"
+keywords = ["cli", "flag", "argv", "args", "argument"]
+categories = ["command-line-interface"]
+
+[lib]
+name = "has_flag"
+path = "src/lib.rs"
 
 [dependencies]
+
+[dev-dependencies]
+# Property tests check the prefix and terminator rules across random input.
+proptest = "1"

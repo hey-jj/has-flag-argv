@@ -201,6 +201,30 @@ const CASES: &[Case] = &[
         want: true,
         note: "J: precomposed single-scalar short flag",
     },
+    Case {
+        flag: "foo bar",
+        argv: &["--foo bar", "--baz"],
+        want: true,
+        note: "K: flag with an internal space matches as a whole token",
+    },
+    Case {
+        flag: "foo bar",
+        argv: &["--foobar"],
+        want: false,
+        note: "L: space-containing flag is not split or trimmed",
+    },
+    Case {
+        flag: "u",
+        argv: &["-u", "--", "-u"],
+        want: true,
+        note: "M: needle on both sides of terminator, first occurrence wins",
+    },
+    Case {
+        flag: "x",
+        argv: &["--", "--x", "--"],
+        want: false,
+        note: "N: needle only after first terminator, even with a later token",
+    },
 ];
 
 #[test]
@@ -233,6 +257,18 @@ fn emoji_takes_double_dash_prefix() {
     // U+1F600 is two UTF-16 code units, so it gets the -- prefix, not -.
     assert!(has_flag("\u{1F600}", &v(&["--\u{1F600}"])));
     assert!(!has_flag("\u{1F600}", &v(&["-\u{1F600}"])));
+}
+
+#[test]
+fn decomposed_grapheme_takes_double_dash_prefix() {
+    // "e" + combining acute (U+0065 U+0301) renders as one glyph but is two
+    // UTF-16 code units. The prefix rule counts code units, so this gets --.
+    // A char-count rule would wrongly see length 2 here as well, but the real
+    // trap is a grapheme-count rule, which would see length 1 and pick a single
+    // dash. Pin both directions.
+    let decomposed = "e\u{0301}";
+    assert!(has_flag(decomposed, &v(&["--e\u{0301}"])));
+    assert!(!has_flag(decomposed, &v(&["-e\u{0301}"])));
 }
 
 #[test]

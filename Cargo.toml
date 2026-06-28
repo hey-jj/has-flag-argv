@@ -14,7 +14,3 @@ name = "has_flag"
 path = "src/lib.rs"
 
 [dependencies]
-
-[dev-dependencies]
-# Property tests check the prefix and terminator rules across random input.
-proptest = "1"

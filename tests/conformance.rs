@@ -295,3 +295,27 @@ fn accepts_str_slice_argv() {
     let argv: &[&str] = &["--foo", "--unicorn"];
     assert!(has_flag("unicorn", argv));
 }
+
+#[test]
+fn explicit_prefix_agrees_with_auto() {
+    // Naming a flag with its dash prefix gives the same result as letting the
+    // function pick the prefix. Check both the long and short forms across a
+    // mixed argv.
+    let argv: &[&str] = &["--foo", "-u", "--unicorn", "--", "--bar"];
+    assert_eq!(has_flag("unicorn", argv), has_flag("--unicorn", argv));
+    assert_eq!(has_flag("u", argv), has_flag("-u", argv));
+    assert_eq!(has_flag("bar", argv), has_flag("--bar", argv));
+}
+
+#[test]
+fn never_panics_on_edge_inputs() {
+    // The function takes `&str`, so input is always valid UTF-8 and cannot
+    // panic. Pin that with dash edges, multibyte scalars, internal `--`, and an
+    // empty flag against an argv built from the same shapes.
+    let argv: &[&str] = &["", "-", "--", "---", "-x", "--x", "café", "😀", "a b"];
+    let flags = ["", "-", "--", "---", "x", "-x", "--x", "café", "😀", "a b"];
+    for flag in flags {
+        // The only assertion is that the call returns without panicking.
+        let _ = has_flag(flag, argv);
+    }
+}

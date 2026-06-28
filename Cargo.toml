@@ -1,0 +1,10 @@
+[package]
+name = "has-flag-rs"
+version = "0.1.0"
+edition = "2021"
+description = "detect presence of a CLI flag in argv"
+license = "MIT"
+repository = "https://github.com/hey-jj/has-flag-rs"
+readme = "README.md"
+
+[dependencies]

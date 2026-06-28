@@ -51,8 +51,9 @@ Matching is exact, case-sensitive, whole-token equality. No substring match, no
 
 ### `has_flag_argv(flag) -> bool`
 
-Like `has_flag`, but reads `std::env::args()` for the argument list. It reads
-the arguments fresh on each call.
+Like `has_flag`, but reads the process arguments for the argument list. It
+reads the arguments fresh on each call and skips any argument that is not valid
+Unicode.
 
 ## Behavior notes
 

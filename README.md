@@ -1,4 +1,4 @@
-# has-flag-rs
+# argv-flag
 
 Detect whether a single command-line flag is present in an argv-style list.
 
@@ -11,7 +11,7 @@ absent.
 
 ```toml
 [dependencies]
-has-flag-rs = "0.1"
+argv-flag = "0.1"
 ```
 
 The library is imported as `has_flag`.

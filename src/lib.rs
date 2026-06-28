@@ -41,10 +41,9 @@
 /// - Otherwise, if `flag` is one UTF-16 code unit long, prepend a single `-`.
 /// - Otherwise, prepend `--`.
 ///
-/// Length is counted in UTF-16 code units to match the behavior of the
-/// JavaScript library this mirrors. For ASCII flags this equals the character
-/// count. A non-BMP scalar such as an emoji counts as two units, so it takes
-/// the `--` prefix.
+/// Length is counted in UTF-16 code units. For ASCII flags this equals the
+/// character count. A non-BMP scalar such as an emoji counts as two units, so
+/// it takes the `--` prefix.
 ///
 /// Matching is exact, case-sensitive, whole-token equality. No substring match,
 /// no `=` splitting, no trimming, no Unicode normalization.
@@ -79,9 +78,14 @@ pub fn has_flag<S: AsRef<str>>(flag: &str, argv: &[S]) -> bool {
         "--"
     };
 
-    let needle = format!("{prefix}{flag}");
+    // Match a token against `prefix + flag` without allocating the needle.
+    let matches = |arg: &str| {
+        arg.len() == prefix.len() + flag.len()
+            && arg.starts_with(prefix)
+            && arg[prefix.len()..] == *flag
+    };
 
-    let position = argv.iter().position(|arg| arg.as_ref() == needle);
+    let position = argv.iter().position(|arg| matches(arg.as_ref()));
     let terminator = argv.iter().position(|arg| arg.as_ref() == "--");
 
     match (position, terminator) {
@@ -93,10 +97,14 @@ pub fn has_flag<S: AsRef<str>>(flag: &str, argv: &[S]) -> bool {
 
 /// Check whether `flag` is present in the process arguments.
 ///
-/// This reads `std::env::args()` on each call and forwards to [`has_flag`]. The
-/// whole argument vector is searched as-is, including the program path at index
-/// zero. A flag needle never realistically matches that path, so the leading
-/// element is harmless.
+/// This reads the process arguments on each call and forwards to [`has_flag`].
+/// The whole argument vector is searched as-is, including the program path at
+/// index zero. A flag needle never realistically matches that path, so the
+/// leading element is harmless.
+///
+/// Arguments that are not valid Unicode are skipped. Such an argument can never
+/// equal a `&str` flag, so the result is unchanged and the call never panics on
+/// non-Unicode input.
 ///
 /// # Examples
 ///
@@ -107,6 +115,8 @@ pub fn has_flag<S: AsRef<str>>(flag: &str, argv: &[S]) -> bool {
 /// assert!(!has_flag_argv("--definitely-not-a-real-flag-xyz"));
 /// ```
 pub fn has_flag_argv(flag: &str) -> bool {
-    let argv: Vec<String> = std::env::args().collect();
+    let argv: Vec<String> = std::env::args_os()
+        .filter_map(|arg| arg.into_string().ok())
+        .collect();
     has_flag(flag, &argv)
 }

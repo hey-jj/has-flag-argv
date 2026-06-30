@@ -5,7 +5,7 @@
 //! examples from the readme. The third block holds edge cases derived from the
 //! algorithm, each value computed from the reference rule.
 
-use has_flag::has_flag;
+use has_flag_argv::has_flag;
 
 fn v(items: &[&str]) -> Vec<String> {
     items.iter().map(|s| s.to_string()).collect()

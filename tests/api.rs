@@ -3,7 +3,7 @@
 //! These pin the two call shapes (explicit argv and default argv) and exercise
 //! the real `has_flag_argv` path against the test binary's own arguments.
 
-use has_flag::{has_flag, has_flag_argv};
+use has_flag_argv::{has_flag, has_flag_argv};
 
 #[test]
 fn returns_bool_both_arities() {

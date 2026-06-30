@@ -1,16 +1,16 @@
 [package]
-name = "argv-flag"
+name = "has-flag-argv"
 version = "0.1.0"
 edition = "2021"
 description = "detect presence of a CLI flag in argv"
 license = "MIT"
-repository = "https://github.com/hey-jj/argv-flag"
+repository = "https://github.com/hey-jj/has-flag-argv"
 readme = "README.md"
 keywords = ["cli", "flag", "argv", "args", "argument"]
 categories = ["command-line-interface"]
 
 [lib]
-name = "has_flag"
+name = "has_flag_argv"
 path = "src/lib.rs"
 
 [dependencies]

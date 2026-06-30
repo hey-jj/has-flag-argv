@@ -12,7 +12,7 @@
 //! # Examples
 //!
 //! ```
-//! use has_flag::has_flag;
+//! use has_flag_argv::has_flag;
 //!
 //! let argv = ["--foo", "--unicorn", "--bar"].map(String::from);
 //!
@@ -24,7 +24,7 @@
 //! Reading from the process arguments:
 //!
 //! ```
-//! use has_flag::has_flag_argv;
+//! use has_flag_argv::has_flag_argv;
 //!
 //! // Looks through the process arguments for `--verbose`.
 //! let _present: bool = has_flag_argv("verbose");
@@ -60,7 +60,7 @@
 /// # Examples
 ///
 /// ```
-/// use has_flag::has_flag;
+/// use has_flag_argv::has_flag;
 ///
 /// let argv = ["-f", "-u", "-b"].map(String::from);
 /// assert!(has_flag("u", &argv)); // single char -> `-u`
@@ -121,7 +121,7 @@ fn prefix_for(flag: &str) -> &'static str {
 /// # Examples
 ///
 /// ```
-/// use has_flag::has_flag_argv;
+/// use has_flag_argv::has_flag_argv;
 ///
 /// // Almost certainly absent from a test binary's arguments.
 /// assert!(!has_flag_argv("--definitely-not-a-real-flag-xyz"));

@@ -1,4 +1,4 @@
-# argv-flag
+# has-flag-argv
 
 Detect whether a single command-line flag is present in an argv-style list.
 
@@ -11,15 +11,15 @@ absent.
 
 ```toml
 [dependencies]
-argv-flag = "0.1"
+has-flag-argv = "0.1"
 ```
 
-The library is imported as `has_flag`.
+The library is imported as `has_flag_argv`.
 
 ## Usage
 
 ```rust
-use has_flag::has_flag;
+use has_flag_argv::has_flag;
 
 let argv = ["--foo", "--unicorn", "--bar"].map(String::from);
 
@@ -31,7 +31,7 @@ assert!(!has_flag("rainbow", &argv));  // absent
 Search the process arguments instead of an explicit list:
 
 ```rust
-use has_flag::has_flag_argv;
+use has_flag_argv::has_flag_argv;
 
 if has_flag_argv("verbose") {
     // run with extra logging

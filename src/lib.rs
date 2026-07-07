@@ -73,11 +73,7 @@ pub fn has_flag<S: AsRef<str>>(flag: &str, argv: &[S]) -> bool {
     let prefix = prefix_for(flag);
 
     // Match a token against `prefix + flag` without allocating the needle.
-    let matches = |arg: &str| {
-        arg.len() == prefix.len() + flag.len()
-            && arg.starts_with(prefix)
-            && arg[prefix.len()..] == *flag
-    };
+    let matches = |arg: &str| arg.strip_prefix(prefix) == Some(flag);
 
     for arg in argv {
         let arg = arg.as_ref();
@@ -100,7 +96,7 @@ pub fn has_flag<S: AsRef<str>>(flag: &str, argv: &[S]) -> bool {
 fn prefix_for(flag: &str) -> &'static str {
     if flag.starts_with('-') {
         ""
-    } else if flag.encode_utf16().count() == 1 {
+    } else if flag.encode_utf16().take(2).count() == 1 {
         "-"
     } else {
         "--"

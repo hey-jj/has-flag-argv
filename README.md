@@ -2,10 +2,9 @@
 
 Detect whether a single command-line flag is present in an argv-style list.
 
-This is a presence check. It returns a boolean. The dash prefix is optional.
-A single-character flag gets one dash, a longer flag gets two. The search stops
-at the POSIX `--` terminator, so a flag at or after the first `--` counts as
-absent.
+The check returns a boolean. The dash prefix is optional: a single-character
+flag gets one dash, a longer flag gets two. The search stops at the POSIX `--`
+terminator, so a flag at or after the first `--` counts as absent.
 
 ## Installation
 
@@ -46,8 +45,8 @@ Check whether `flag` is present in `argv`. The `argv` parameter is any slice of
 string-like values (`&[String]` or `&[&str]`). The dash prefix on `flag` is
 optional.
 
-Matching is exact, case-sensitive, whole-token equality. No substring match, no
-`=` splitting, no trimming, no Unicode normalization.
+Matching is whole-token, case-sensitive, byte-for-byte equality on the strings
+as given. A token like `--foo=bar` does not match `foo`.
 
 ### `has_flag_argv(flag) -> bool`
 
@@ -59,7 +58,7 @@ Unicode.
 
 - Prefix rule: a flag that already starts with `-` is searched verbatim. A flag
   one UTF-16 code unit long gets a single `-`. Anything longer gets `--`.
-- An empty flag never matches. A flag equal to `--` never matches, because the
+- An empty flag returns `false`. So does a flag equal to `--`, because the
   searched token would collide with the terminator.
 - Only the first occurrence of the flag matters, compared against the first
   `--` terminator.
